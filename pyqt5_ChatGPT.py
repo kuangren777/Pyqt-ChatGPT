@@ -8,8 +8,17 @@ import re
 import requests
 from datetime import datetime
 import sqlite3
+import configparser
 
 openai.api_key = '自己去某宝或其他途径买api_key'
+
+
+def get_key():
+    # 创建 ConfigParser 对象
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    return config.get('API', 'api_key')
 
 
 class ChatUI(QtWidgets.QMainWindow):
@@ -21,7 +30,8 @@ class ChatUI(QtWidgets.QMainWindow):
         self.get_chat_id()
         self.messages = """"""
         self.used = []
-        self.setWindowTitle('龚敏的傻子助手Chatgpt_v3')
+        self.open_ai_key = get_key()
+        self.setWindowTitle('龚敏的傻子助手Chatgpt_v5')
         self.new_info.connect(self.show_message)
 
         self.text_box = QtWidgets.QTextEdit()
@@ -84,12 +94,13 @@ class ChatUI(QtWidgets.QMainWindow):
         self.chat_id = chat_id_obj.fetchall()[0][0] + 1
 
     def get_response(self):
+        error = False
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
         session = requests.session()
         url_set_key = "http://vipvip.icu/setsession.php"
         # open_ai_key = "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"
-        open_ai_key = "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"
+
         url_stream = "http://vipvip.icu/stream.php"
 
         pattern = re.compile(r'"choices":\[{"delta":{"content":"(.*?)"},"index":')
@@ -115,7 +126,7 @@ class ChatUI(QtWidgets.QMainWindow):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
             "message": ask_t,
             "context": used_to_string,
-            "key": open_ai_key,
+            "key": self.open_ai_key,
             "Proxy-Connection": "keep-alive",
             "X-Requested-With": "XMLHttpRequest",
             "Dnt": "1",
@@ -139,8 +150,27 @@ class ChatUI(QtWidgets.QMainWindow):
         success = response_data_1["success"]
         if not success:
             return "未连接成功\n"
-        self.show_message("连接成功\n")
         res_stream = session.get(url=url_stream, data=data_stream, stream=True)
+        err_code = res_stream.headers['Set-Cookie']
+        error_messages = {
+            "invalid_api_key": "key不合法，请联系管理员",
+            "context_length_exceeded": "问题和上下文长度超限，请重新提问",
+            "rate_limit_reached": "同时访问用户过多，请稍后再试",
+            "access_terminated": "违规使用，API-KEY被封禁",
+            "no_api_key": "未提供API-KEY",
+            "insufficient_quota": "API-KEY余额不足",
+            "account_deactivated": "账户已禁用",
+            "model_overloaded": "OpenAI模型超负荷，请重新发起请求"
+        }
+        # print(err_code)
+        for error_message in error_messages:
+            if error_message in err_code:
+                self.show_message(error_messages[error_message])
+                error = True
+                continue
+        if error:
+            return "连接失败\n"
+        self.show_message("连接成功\n")
         self.new_info.emit('GPT:')
         ans = ""
         ans_t = """"""
