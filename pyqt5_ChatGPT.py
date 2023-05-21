@@ -89,7 +89,7 @@ class ChatUI(QtWidgets.QMainWindow):
         session = requests.session()
         url_set_key = "http://vipvip.icu/setsession.php"
         # open_ai_key = "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"
-        open_ai_key = "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"
+        open_ai_key = "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"
         url_stream = "http://vipvip.icu/stream.php"
 
         pattern = re.compile(r'"choices":\[{"delta":{"content":"(.*?)"},"index":')
