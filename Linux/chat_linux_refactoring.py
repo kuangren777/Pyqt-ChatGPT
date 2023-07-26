@@ -66,13 +66,13 @@ def backup_data(cursor, conn, chat_id, used):
 
 
 def process_request(session, ask_t, used_to_string, open_ai_key):
-    url_set_key = "http://vipvip.icu/setsession.php"
-    url_stream = "http://vipvip.icu/stream.php"
+    url_set_key = "http://100vip.xyz/setsession.php"
+    url_stream = "http://100vip.xyz/stream.php"
 
     pattern = re.compile(r'"choices":\[{"delta":{"content":"(.*?)"},"index":')
 
     head = {
-        "Referer": "http://vipvip.icu/",
+        "Referer": "http://100vip.xyz/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.38"
     }
 
@@ -109,7 +109,7 @@ def main():
         print("欢迎使用图书馆专属对话系统，感谢ai.com提供的技术支持，请直接输入：")
 
         session = requests.session()
-        url_stream = "http://vipvip.icu/stream.php"
+        url_stream = "http://100vip.xyz/stream.php"
         used = []
         while True:
             ask_t = input()
@@ -132,9 +132,9 @@ def main():
                 "Cache-Control": "no-cache",
                 "Cookie": "PHPSESSID=gkcftudq16e9v52uuf6gata73q",
                 "Dnt": "1",
-                "Host": "vipvip.icu",
+                "Host": "100vip.xyz",
                 "Proxy-Connection": "keep-alive",
-                "Referer": "http://vipvip.icu/",
+                "Referer": "http://100vip.xyz/",
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
             }
 

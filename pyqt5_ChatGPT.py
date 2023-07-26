@@ -31,7 +31,7 @@ class ChatUI(QtWidgets.QMainWindow):
         self.messages = """"""
         self.used = []
         self.open_ai_key = get_key()
-        self.setWindowTitle('龚敏的傻子助手Chatgpt_v5')
+        self.setWindowTitle('龚敏的神奇海螺_v1')
         self.new_info.connect(self.show_message)
 
         self.text_box = QtWidgets.QTextEdit()
@@ -57,6 +57,17 @@ class ChatUI(QtWidgets.QMainWindow):
         self.create_shortcut()  # 创建快捷键
         self.chat_id_show_message = "当前聊天编号为:" + str(self.chat_id) + "\n"
         self.show_message(self.chat_id_show_message)
+
+        self.host = None
+        self.domain = None
+        self.get_host()
+
+    def get_host(self):
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+
+        self.host = config.get('SERVER', 'host')
+        self.domain = config.get('SERVER', 'domain')
 
     def create_shortcut(self):
         shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.SHIFT + QtCore.Qt.Key_Return), self.input_box)
@@ -98,10 +109,10 @@ class ChatUI(QtWidgets.QMainWindow):
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
         session = requests.session()
-        url_set_key = "http://vipvip.icu/setsession.php"
+        url_set_key = f"http://{self.host}.{self.domain}/setsession.php"
         # open_ai_key = "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"
 
-        url_stream = "http://vipvip.icu/stream.php"
+        url_stream = f"http://{self.host}.{self.domain}/stream.php"
 
         pattern = re.compile(r'"choices":\[{"delta":{"content":"(.*?)"},"index":')
         ask_t = self.messages
@@ -109,7 +120,7 @@ class ChatUI(QtWidgets.QMainWindow):
         used_to_string = str(self.used).replace("\'", '\"')
         print(used_to_string)
         head = {
-            "Referer": "http://vipvip.icu/",
+            "Referer": f"http://{self.host}.{self.domain}/",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.38"
         }
 
@@ -119,10 +130,9 @@ class ChatUI(QtWidgets.QMainWindow):
             "Accept-Language": "zh-CN,zh;q=0.9",
             "Content-Length": "521",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Cookie": "PHPSESSID=gkcftudq16e9v52uuf6gata73q",
-            "Host": "vipvip.icu",
-            "Origin": "http://vipvip.icu",
-            "Referer": "http://vipvip.icu/",
+            "Host": f"{self.host}.{self.domain}",
+            "Origin": f"http://{self.host}.{self.domain}",
+            "Referer": f"http://{self.host}.{self.domain}/",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
             "message": ask_t,
             "context": used_to_string,
@@ -137,11 +147,10 @@ class ChatUI(QtWidgets.QMainWindow):
             "Accept-Encoding": "gzip, deflate",
             "AcceptLanguage": "zh-CN,zh;q=0.9",
             "Cache-Control": "no-cache",
-            "Cookie": "PHPSESSID=gkcftudq16e9v52uuf6gata73q",
             "Dnt": "1",
-            "Host": "vipvip.icu",
+            "Host": f"{self.host}.{self.domain}",
             "Proxy-Connection": "keep-alive",
-            "Referer": "http://vipvip.icu/",
+            "Referer": f"http://{self.host}.{self.domain}/",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
         }
 
@@ -205,6 +214,7 @@ class ChatUI(QtWidgets.QMainWindow):
         # self.gpt_backup(self.chat_id, used_to_string)
         threading.Thread(target=self.gpt_backup, args=(self.chat_id, used_to_string)).start()
         # return ans_t
+        session.close()
 
     def show_message(self, message):
         cursor = self.text_box.textCursor()
